@@ -1,11 +1,11 @@
+<!-- eslint-disable no-console -->
 <!-- 需求：根据传入的值动态修改进度条；根据是否可以拖动修改当前播放参数，并传出 -->
 <script lang="ts" setup>
-import { type } from 'os';
-import { onMounted, ref, nextTick, toRefs, watch, reactive, onBeforeUnmount } from 'vue';
+import { nextTick, onBeforeUnmount, onMounted, reactive, ref, toRefs, watch } from 'vue';
 interface Props {
-  percent?: Number | String,
-  percentProgress?: Number | String,
-  disabled?: Boolean
+  percent?: Number | String;
+  percentProgress?: Number | String;
+  disabled?: Boolean;
 }
 type RefElement = HTMLElement | null;
 const dotWidth = 10;
@@ -14,106 +14,122 @@ const progressRefs = ref<RefElement>(null);
 // the scrubber $refs,modify the width
 const scrubberRefs = ref<RefElement>(null);
 const listRefs = ref<RefElement>(null);
-const width = ref<number>(0)
-const props = defineProps<Props>()
-const emit = defineEmits(['change', 'delete'])
+const width = ref<number>(0);
+const props = defineProps<Props>();
+const emit = defineEmits(['change', 'delete']);
 const moveReact = reactive({
   status: false,
   scaleX: 0,
-  left: 0
-})
+  left: 0,
+});
 
-watch(() => props.percent, (value, preValue) => {
-  console.log('⚽︎⚽︎⚽︎', value, preValue);
-  // scrubberRefs.value.style.transform = `translateX(${value}px)`;
-})
-watch(() => moveReact.status, (value, preValue) => {
-  if (value) {
-    _bindEvents();
-  } else {
-    _removeEvents();
+watch(
+  () => props.percent,
+  (value, preValue) => {
+    console.log('⚽︎⚽︎⚽︎', value, preValue);
+    // scrubberRefs.value.style.transform = `translateX(${value}px)`;
   }
-})
+);
+watch(
+  () => moveReact.status,
+  (value, preValue) => {
+    if (value) _bindEvents();
+    else _removeEvents();
+  }
+);
 
 onMounted(() => {
   nextTick(() => {
     console.log(listRefs.value!.getBoundingClientRect());
-  })
+  });
 });
 
 onBeforeUnmount(() => {
-  _removeEvents()
-})
+  _removeEvents();
+});
 
 const handleScrubberDown = ($event) => {
   console.log('鼠标按下事件', $event);
-}
+};
 
 const handleScrubberMover = ($event) => {
   moveReact.status = true;
-  const scrubberButtonRefs = scrubberRefs.value!.getBoundingClientRect().width / 2
+  const scrubberButtonRefs = scrubberRefs.value!.getBoundingClientRect().width / 2;
   moveReact.scaleX = $event.layerX - scrubberButtonRefs;
   width.value = listRefs.value!.getBoundingClientRect().width;
-  console.log(scrubberButtonRefs)
-  if (moveReact.scaleX >= width.value) {
+  console.log(scrubberButtonRefs);
+  if (moveReact.scaleX >= width.value)
     scrubberRefs.value!.style.transform = `translateX(${width.value}px)`;
-  } else if (moveReact.scaleX < -scrubberButtonRefs) {
+  else if (moveReact.scaleX < -scrubberButtonRefs)
     scrubberRefs.value!.style.transform = `translateX(${-scrubberButtonRefs}px)`;
-  } else {
-    scrubberRefs.value!.style.transform = `translateX(${moveReact.scaleX}px)`;
-  }
-  console.log('dragstart', moveReact.scaleX,width.value);
-}
+  else scrubberRefs.value!.style.transform = `translateX(${moveReact.scaleX}px)`;
+
+  console.log('dragstart', moveReact.scaleX, width.value);
+};
 
 const handleScrubberUp = ($event) => {
   moveReact.status = false;
   console.log('drop', $event);
-}
+};
 
 // 添加绑定事件
 const _bindEvents = () => {
-  document.addEventListener('mousemove', handleScrubberMover)
-  document.addEventListener('mouseup', handleScrubberUp)
-  document.addEventListener('touchmove', handleScrubberMover)
-  document.addEventListener('touchend', handleScrubberUp)
-}
+  document.addEventListener('mousemove', handleScrubberMover);
+  document.addEventListener('mouseup', handleScrubberUp);
+  document.addEventListener('touchmove', handleScrubberMover);
+  document.addEventListener('touchend', handleScrubberUp);
+};
 // 移除绑定事件
 const _removeEvents = () => {
-  document.removeEventListener('mousemove', handleScrubberMover)
-  document.removeEventListener('mouseup', handleScrubberUp)
-  document.removeEventListener('touchmove', handleScrubberMover)
-  document.removeEventListener('touchend', handleScrubberUp)
-}
+  document.removeEventListener('mousemove', handleScrubberMover);
+  document.removeEventListener('mouseup', handleScrubberUp);
+  document.removeEventListener('touchmove', handleScrubberMover);
+  document.removeEventListener('touchend', handleScrubberUp);
+};
 </script>
 
 <template>
-  <div class="wsp-progress-bar" tabindex="-1" role="slider" aria-label="播放滑块" aria-valuemin="0" aria-valuemax="120"
-    aria-valuenow="4" aria-valuetext="0 分钟 7 秒/0 分钟 57 秒">
-    <div class="wsp-chapters-container" style="height: 7px;">
-      <div class="wsp-chapter-hover-container" style="width: 100%;">
+  <div
+    class="wsp-progress-bar"
+    tabindex="-1"
+    role="slider"
+    aria-label="播放滑块"
+    aria-valuemin="0"
+    aria-valuemax="120"
+    aria-valuenow="4"
+    aria-valuetext="0 分钟 7 秒/0 分钟 57 秒"
+  >
+    <div class="wsp-chapters-container" style="height: 7px">
+      <div class="wsp-chapter-hover-container" style="width: 100%">
         <div class="wsp-progress-bar-padding" />
-        <div class="wsp-progress-list" ref='listRefs'>
+        <div ref="listRefs" class="wsp-progress-list">
           <!-- 已播放区 -->
-          <div class="wsp-play-progress wsp-swatch-background-color" ref='progressRefs'
-            style="left: 0px; transform: scaleX(0);" />
+          <div
+            ref="progressRefs"
+            class="wsp-play-progress wsp-swatch-background-color"
+            style="left: 0px; transform: scaleX(0)"
+          />
           <div class="wsp-progress-linear-live-buffer" />
           <!-- 缓冲区 -->
-          <div class="wsp-load-progress" style="left: 0px; transform: scaleX(1);" />
-          <div class="wsp-hover-progress" style="left: 0px; transform: scaleX(0);" />
+          <div class="wsp-load-progress" style="left: 0px; transform: scaleX(1)" />
+          <div class="wsp-hover-progress" style="left: 0px; transform: scaleX(0)" />
           <div class="wsp-ad-progress-list" />
         </div>
       </div>
     </div>
     <!-- 播放指示器 -->
-    <div class="wsp-scrubber-container" ref='scrubberRefs'>
-      <div class="wsp-scrubber-button wsp-swatch-background-color" @mousedown.prevent='handleScrubberMover'
-        @drop='handleScrubberUp'>
-        <div class="wsp-scrubber-pull-indicator"></div>
+    <div ref="scrubberRefs" class="wsp-scrubber-container">
+      <div
+        class="wsp-scrubber-button wsp-swatch-background-color"
+        @mousedown.prevent="handleScrubberMover"
+        @drop="handleScrubberUp"
+      >
+        <div class="wsp-scrubber-pull-indicator" />
       </div>
     </div>
   </div>
 </template>
-<style lang='scss' scoped>
+<style lang="scss" scoped>
 @mixin position {
   position: absolute;
   bottom: 0;
@@ -157,10 +173,10 @@ const _removeEvents = () => {
 
       .wsp-progress-list {
         z-index: 39;
-        background: rgba(255, 255, 255, .2);
+        background: rgba(255, 255, 255, 0.2);
         height: 100%;
         transform: scaleY(0.6);
-        transition: transform .1s cubic-bezier(0.4, 0, 1, 1);
+        transition: transform 0.1s cubic-bezier(0.4, 0, 1, 1);
         position: relative;
 
         .wsp-play-progress {
@@ -179,13 +195,13 @@ const _removeEvents = () => {
           opacity: 0;
           transform-origin: 0 0;
           @include position();
-          transition: transform .1s cubic-bezier(0.4, 0, 1, 1);
+          transition: transform 0.1s cubic-bezier(0.4, 0, 1, 1);
         }
 
         .wsp-load-progress {
           @include position();
           z-index: 33;
-          background: rgba(255, 255, 255, .4);
+          background: rgba(255, 255, 255, 0.4);
           transform-origin: 0 0;
           left: 0px;
           transform: scaleX(0.703556);
@@ -194,9 +210,9 @@ const _removeEvents = () => {
         .wsp-hover-progress {
           @include position();
           z-index: 35;
-          background: rgba(0, 0, 0, .125);
+          background: rgba(0, 0, 0, 0.125);
           opacity: 0;
-          transition: opacity .25s cubic-bezier(0, 0, 0.2, 1);
+          transition: opacity 0.25s cubic-bezier(0, 0, 0.2, 1);
         }
 
         .wsp-ad-progress-list {
@@ -228,10 +244,10 @@ const _removeEvents = () => {
 
         &::before,
         &::after {
-          transition: all .2s;
+          transition: all 0.2s;
           display: block;
           position: absolute;
-          content: "";
+          content: '';
           top: 0;
           left: 0;
           opacity: 0;

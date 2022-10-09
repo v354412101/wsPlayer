@@ -1,13 +1,13 @@
-import { resolve } from 'path'
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
+import { resolve } from 'path';
+import { defineConfig } from 'vite';
+import vue from '@vitejs/plugin-vue';
 
 export default defineConfig(({ mode }) => {
-  const isProd = mode === 'prod'
-  const isDev = mode === 'dev'
-  const isTest = mode === 'test'
+  const isProd = mode === 'prod';
+  const isDev = mode === 'dev';
+  const isTest = mode === 'test';
 
-  let build = {}
+  let build = {};
   if (isProd) {
     build = {
       lib: {
@@ -22,9 +22,7 @@ export default defineConfig(({ mode }) => {
          * make sure to externalize deps that shouldn't be bundled
          * into your library
          */
-        external: [
-          'vue',
-        ],
+        external: ['vue'],
         output: {
           /**
            * DESC:
@@ -32,14 +30,14 @@ export default defineConfig(({ mode }) => {
            * for externalized deps
            */
           globals: {
-            'vue': 'Vue'
+            vue: 'Vue',
           },
         },
       },
-    }
+    };
   }
 
-  let optimizeDeps = {}
+  let optimizeDeps = {};
   if (isDev) {
     /**
      * DESC:
@@ -47,10 +45,10 @@ export default defineConfig(({ mode }) => {
      */
     optimizeDeps = {
       exclude: [],
-    }
+    };
   }
 
-  let test = {}
+  let test = {};
   if (isTest) {
     /**
      * DESC:
@@ -60,18 +58,12 @@ export default defineConfig(({ mode }) => {
       include: ['test/**/*.test.ts'],
       environment: 'happy-dom',
       deps: {
-        inline: [
-          '@vue'
-        ],
+        inline: ['@vue'],
       },
       coverage: {
-        reporter: [
-          'text',
-          'text-summary',
-          'lcov',
-        ],
+        reporter: ['text', 'text-summary', 'lcov'],
       },
-    }
+    };
   }
 
   return {
@@ -92,5 +84,5 @@ export default defineConfig(({ mode }) => {
         },
       ],
     },
-  }
-})
+  };
+});
